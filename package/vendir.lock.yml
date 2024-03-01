@@ -1,0 +1,9 @@
+apiVersion: vendir.k14s.io/v1alpha1
+directories:
+- contents:
+  - helmChart:
+      appVersion: 1.23.7
+      version: 16.8.1
+    path: weaviate
+  path: config/helm/upstream
+kind: LockConfig

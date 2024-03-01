@@ -1,0 +1,21 @@
+---
+image:
+  tag: 1.24.0
+  pullSecrets:
+    - canonical-registry-credentials
+
+storage:
+  size: 4Gi
+
+service:
+  type: ClusterIP
+
+grpcService:
+  type: ClusterIP
+
+env:
+  AUTHENTICATION_APIKEY_ENABLED: 'true'
+  AUTHENTICATION_APIKEY_USERS: waldo
+
+envSecrets:
+  AUTHENTICATION_APIKEY_ALLOWED_KEYS: weaviate-api-keys

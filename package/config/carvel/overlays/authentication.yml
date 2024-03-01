@@ -1,0 +1,34 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"Secret", "metadata":{"name":"weaviate-cluster-api-basic-auth"}})
+#@overlay/remove
+---
+
+---
+apiVersion: secretgen.k14s.io/v1alpha1
+kind: Password
+metadata:
+  name: weaviate-api-keys
+  namespace: weaviate
+spec:
+  length: 124
+  secretTemplate:
+    type: Opaque
+    stringData:
+      AUTHENTICATION_APIKEY_ALLOWED_KEYS: $(value)
+
+#! Why it's needed: https://github.com/weaviate/weaviate-helm/issues/205
+---
+apiVersion: secretgen.k14s.io/v1alpha1
+kind: Password
+metadata:
+  name: weaviate-cluster-api-basic-auth
+  namespace: weaviate
+spec:
+  length: 64
+  secretTemplate:
+    type: Opaque
+    stringData:
+      username: whereswaldo
+      password: $(value)

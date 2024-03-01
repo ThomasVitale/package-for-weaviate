@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: weaviate-values
+  namespace: tests
+stringData:
+  values.yaml: |
+    storage:
+      size: 250Mi
