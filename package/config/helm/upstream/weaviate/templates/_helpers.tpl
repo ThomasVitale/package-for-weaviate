@@ -35,6 +35,15 @@
   {{- if (index .Values "modules" "generative-anyscale" "enabled") -}}
     {{ $modules = append $modules "generative-anyscale" }}
   {{- end -}}
+  {{- if (index .Values "modules" "generative-mistral" "enabled") -}}
+    {{ $modules = append $modules "generative-mistral" }}
+  {{- end -}}
+  {{- if (index .Values "modules" "generative-ollama" "enabled") -}}
+    {{ $modules = append $modules "generative-ollama" }}
+  {{- end -}}
+  {{- if (index .Values "modules" "generative-octoai" "enabled") -}}
+    {{ $modules = append $modules "generative-octoai" }}
+  {{- end -}}
   {{- if or (index .Values "modules" "img2vec-neural" "enabled") (index .Values "modules" "img2vec-neural" "inferenceUrl") -}}
     {{ $modules = append $modules "img2vec-neural" }}
   {{- end -}}
@@ -52,6 +61,9 @@
   {{- end -}}
   {{- if or (index .Values "modules" "multi2vec-bind" "enabled") (index .Values "modules" "multi2vec-bind" "inferenceUrl") -}}
     {{ $modules = append $modules "multi2vec-bind" }}
+  {{- end -}}
+  {{- if (index .Values "modules" "multi2vec-palm" "enabled") -}}
+    {{ $modules = append $modules "multi2vec-palm" }}
   {{- end -}}
   {{- if (index .Values "modules" "text2vec-openai" "enabled") -}}
     {{ $modules = append $modules "text2vec-openai" }}
@@ -71,6 +83,15 @@
   {{- if (index .Values "modules" "text2vec-aws" "enabled") -}}
     {{ $modules = append $modules "text2vec-aws" }}
   {{- end -}}
+  {{- if (index .Values "modules" "text2vec-voyageai" "enabled") -}}
+    {{ $modules = append $modules "text2vec-voyageai" }}
+  {{- end -}}
+  {{- if (index .Values "modules" "text2vec-ollama" "enabled") -}}
+    {{ $modules = append $modules "text2vec-ollama" }}
+  {{- end -}}
+  {{- if (index .Values "modules" "text2vec-octoai" "enabled") -}}
+    {{ $modules = append $modules "text2vec-octoai" }}
+  {{- end -}}
   {{- if (index .Values "modules" "ref2vec-centroid" "enabled") -}}
     {{ $modules = append $modules "ref2vec-centroid" }}
   {{- end -}}
@@ -79,6 +100,9 @@
   {{- end -}}
   {{- if (index .Values "modules" "reranker-transformers" "enabled") -}}
     {{ $modules = append $modules "reranker-transformers" }}
+  {{- end -}}
+  {{- if (index .Values "modules" "reranker-voyageai" "enabled") -}}
+    {{ $modules = append $modules "reranker-voyageai" }}
   {{- end -}}
   {{- if (index .Values "backups" "filesystem" "enabled") -}}
     {{ $modules = append $modules "backup-filesystem" }}
@@ -159,5 +183,56 @@ Usage:
 
   {{- if (not (empty $priorityClassName)) -}}
     {{- printf "priorityClassName: %s" $priorityClassName -}}
+  {{- end -}}
+{{- end -}}
+
+
+{{/*
+Raft cluster configuration settings
+*/}}
+{{- define "raft_configuration" -}}
+  {{- $replicas := .Values.replicas | int -}}
+  {{- $voters := .Values.env.RAFT_BOOTSTRAP_EXPECT | int -}}
+  {{- $metada_only_voters := false -}}
+  {{- if not (empty .Values.env.RAFT_METADATA_ONLY_VOTERS) -}}
+    {{- $metada_only_voters = .Values.env.RAFT_METADATA_ONLY_VOTERS -}}
+  {{- end -}} 
+  {{- if empty .Values.env.RAFT_BOOTSTRAP_EXPECT -}}
+    {{- if ge $replicas 10 -}}
+      {{- $voters = 5 -}}
+    {{- else if ge $replicas 3 -}}
+      {{- $voters = 3 -}}
+    {{- else -}}
+      {{- $voters = 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt $voters $replicas  -}}
+    {{- fail "env.RAFT_BOOTSTRAP_EXPECT value cannot be greater than replicas value" -}}
+  {{- end -}}
+  {{- if empty .Values.env.RAFT_JOIN -}}
+    {{- $nodes := list -}}
+    {{- range $i := until $voters -}}
+      {{- $node_name := list -}}
+      {{- $node_name = append $node_name "weaviate" -}}
+      {{- $node_name = append $node_name $i -}}
+      {{- $nodes = append $nodes (join "-" $node_name) -}}
+    {{- end -}}
+          - name: RAFT_JOIN
+            value: "{{ join "," $nodes }}"
+  {{- else -}}
+    {{- $votersCount := len (split "," .Values.env.RAFT_JOIN) -}}
+    {{- if empty .Values.env.RAFT_BOOTSTRAP_EXPECT }}
+      {{- $voters = $votersCount -}}
+    {{- end -}}
+    {{- if not (eq $votersCount $voters)  -}}
+      {{- fail "env.RAFT_BOOTSTRAP_EXPECT value needs to be equal to number of env.RAFT_JOIN nodes" -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if empty .Values.env.RAFT_BOOTSTRAP_EXPECT }}
+          - name: RAFT_BOOTSTRAP_EXPECT
+            value: "{{ $voters }}"
+  {{- end -}}
+  {{- if and ($metada_only_voters) (le $replicas $voters) -}}
+    {{- fail "env.RAFT_METADATA_ONLY_VOTERS is true then .replicas size must be greater than env.RAFT_BOOTSTRAP_EXPECT" -}}
   {{- end -}}
 {{- end -}}

@@ -5,7 +5,7 @@ directories:
       name: weaviate
       repository:
         url: https://weaviate.github.io/weaviate-helm
-      version: 16.8.4
+      version: 17.0.0
     path: weaviate
   path: config/helm/upstream
 kind: Config
