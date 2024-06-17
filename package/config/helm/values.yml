@@ -1,6 +1,6 @@
 ---
 image:
-  tag: 1.24.1
+  tag: 1.25.4
   pullSecrets:
     - canonical-registry-credentials
 
