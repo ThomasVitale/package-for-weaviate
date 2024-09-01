@@ -6,6 +6,9 @@
 [![The Apache 2.0 license badge](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Follow us on Twitter](https://img.shields.io/static/v1?label=Twitter&message=Follow&color=1DA1F2)](https://twitter.com/kadrasIO)
 
+> **Warning**
+> This package has been archived. If you need a vector database, you can choose [PostgreSQL](https://github.com/kadras-io/package-for-postgresql-operator) with the [PGVector](https://github.com/pgvector/pgvector) extension, supported by Kadras, or bring your own database package.
+
 A Carvel package for [Weaviate](https://weaviate.io), an AI-native vector database that helps developers create intuitive and reliable AI-powered applications.
 
 ## 🚀&nbsp; Getting Started
